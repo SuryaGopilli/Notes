@@ -1,3 +1,5 @@
+Docker_notes
+
 What is an executable file?
 There are two types of compilations which transfers assembly language into binary/machinary code
 1. Compiler 2. Interpreter
