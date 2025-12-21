@@ -27,6 +27,13 @@ Think of the image as a compressed folder. When it’s uncompressed into a conta
 •	Metadata: A small JSON file that tells Docker things like "the default user is root" or "the default command to run is /bin/bash."
 Note: Every .iso images(.iso is an extension for images) will have an kernel image inside it. Which is called full/complete image. when we use these full images as base image in our docker file the container unpacking this layers in image will also unpacks the kernel image but not be used, cause container is a process running by host/server kernel; a kernel running the process will not initiate another kernel.
 
+Does every image and runtime have a User Space?
+Yes, all Images and runtime images will have an user space except bare/scratch images
+•  Standard Images (Ubuntu, Python, etc.): These always have a User Space. They provide a familiar environment so you can run commands and install things easily.
+•  Minimal Images (Alpine): These have a very tiny User Space (around 5MB). They include only the bare essentials to keep things lightweight.
+•  The Exception - scratch: There is a special "empty" image in Docker called scratch. It contains zero files. No shell, no libraries, nothing.
+How does it work? You can only use scratch if you have a statically compiled binary (like a Go or C++ app) that has all its libraries built into the single executable file. In this case, your app is the entire User Space.
+
 How containers run using images?
 example : base image ubuntu ; copies the application artifact to specific folder ; adds the additional services; adds dependencies ; now convert all these into an executable file/ if its an runtime app convert into an runtime file.
 Note: When an image is pulled it’ll perform one(1) time action downloading image content and stores in our local as readable files.
