@@ -1,0 +1,70 @@
+What is an executable file?
+There are two types of compilations which transfers assembly language into binary/machinary code
+1. Compiler 2. Interpreter
+Compiler: Converts the written source code into a machinery/binary code and store that output as a file. That file consists of binary code 0’s and 1’s which can be executed without any application, cause system will only understand the binary language.
+example: c [txt.exe -> gives output when executed ./txt.exe
+Interpreter: Converts our source code into an machinery language using an runtime application, it converts code line by line and produces output as result.
+example: python [ txt.py ->python txt.py requires python to run this file]
+What is a container?
+Container is a process isolation of an server, a server has a host operating system and on top of server we install docker a software which isolates the os process into separate machines called containers. To run a container, it requires only one thing which is called “os user space” which consists of,
+1. System Libraries: Files like libc.so (the glue between your code and the kernel).
+2. Package Managers: Tools like apt, yum, or apk used to install more software.
+3. Shells & Utilities: Basic commands like ls, cd, grep, and bash.
+4. Application Runtime: The specific engine needed to run your code (like the python interpreter or node binary).
+5. Config Files: Settings in /etc that tell the system how to behave (like timezones or DNS settings).
+Unlike a VM, Container uses HOST OS(KERNEL) to perform specific operations which helps in reduce the additional dependencies requirement and usage of kernel image.
+
+What is an image?
+An image is a set of instructions and operations specified to perform along with its dependencies and libs.
+we create image using an file(docker file) including all the instructions in that file; each line in a docker file is created like an layer when forming an image. That why we say Images are layers.
+Example: Let’s take an ubuntu image, When you pull the ubuntu image from a registry, you aren't getting a bootable OS(Bootloader, Kernel, Init system...); you are getting a root filesystem (the User Space).
+What's inside the Ubuntu Image? 
+Think of the image as a compressed folder. When it’s uncompressed into a container, it looks like this:
+•	The Directory Structure: You'll see the standard Linux folders like /bin, /etc, /var, and /usr.
+•	Essential Binaries: It includes tools to move around and manage the system, like ls, cp, mkdir, and bash.
+•	The Package Manager: It includes apt, which allows you to download more software (like Python or Nginx) once the container is running.
+•	System Libraries: Crucial files like libc.so that allow programs to talk to the host kernel.
+•	Metadata: A small JSON file that tells Docker things like "the default user is root" or "the default command to run is /bin/bash."
+Note: Every .iso images(.iso is an extension for images) will have an kernel image inside it. Which is called full/complete image. when we use these full images as base image in our docker file the container unpacking this layers in image will also unpacks the kernel image but not be used, cause container is a process running by host/server kernel; a kernel running the process will not initiate another kernel.
+
+How containers run using images?
+example : base image ubuntu ; copies the application artifact to specific folder ; adds the additional services; adds dependencies ; now convert all these into an executable file/ if its an runtime app convert into an runtime file.
+Note: When an image is pulled it’ll perform one(1) time action downloading image content and stores in our local as readable files.
+Image is formed in layers, containers use an editable layer on top of this image cause image layers are only readable and uneditable layers.
+In that editable layer container will mount the paths of that image, meaning it copies/references the image to editable layer and performs action on that layer.  
+Note: Container creates editable layer using mounting and union file system process.
+mounting is like attaching another additional space and providing access to it and Union File System is like stacking multiple files/directories one by one on top of each other where it'll be visible as one.
+Note: Docker uses caching, if we update any layer in docker file and create an image the line before that will be auto pasted from cache and from where line got changed will update as per file(follows top down approach) editing first line of file will result in longer time of image generation, since it recreates entire docker image generation process from start.
+
+why can’t containers run windows runtimes on linux host?
+Because containers share the host's kernel, they must "speak its language." This creates a compatibility wall that defines what you can and cannot run.
+The Kernel Language Barrier 
+A container image only contains the User Space (libraries and tools). It does not have its own kernel.
+•	Linux Containers are designed to send Linux System Calls (like fork(), mount(), or open()) to a Linux kernel.
+•	Windows Runtimes (and .exe files) are designed to send Windows System Calls (like NtCreateProcess or NtOpenFile) to a Windows kernel.
+If you put a Windows runtime inside a container and try to run it on a Linux host, the runtime will try to shout "Windows instructions" at the Linux kernel. The Linux kernel simply won't understand them. It’s like trying to run a PlayStation disc in a Nintendo console—the "engine" underneath is built for a different set of instructions.
+________________________________________
+"Wait, but I've run Linux containers on Windows!" 🤨
+You might have noticed that Docker Desktop on Windows can run Linux containers. It feels like magic, but it's actually a clever trick:
+1.	The Secret VM: Behind the scenes, Docker Desktop spins up a tiny, lightweight Linux Virtual Machine (often using WSL 2).
+2.	The True Host: The Linux containers are actually running on top of that Linux VM's kernel, not the Windows kernel directly.
+3.	The Illusion: Docker just makes it look like they are running on Windows.
+Why doesn't Linux do the same for Windows? 🐧
+While it’s technically possible to run a Windows VM inside Linux to host Windows containers, it is rarely done because:
+•	Licensing: Windows requires a paid license to run, even in a container. Linux is free. 💸
+•	Weight: Windows "User Space" images are massive (often 1GB–5GB+), while Linux images can be as small as 5MB.
+•	Complexity: The Windows kernel and User Space are very tightly coupled, making it much harder to "strip down" for a lightweight container experience compared to Linux.
+
+What is wsl 2 (winows sub system for linux 2)?
+Linux containers can’t run on windows machines without an Linux kernel, WSL 2 (Windows Subsystem for Linux 2) is the bridge Microsoft built to solve that exact problem.
+Note: wsl 2 is also a light weight vm by Microsoft. We can install it via powershell using command wsl –install
+Refrence: https://youtu.be/_fntjriRe48?si=WdsL0Nuk0bdetk7v
+The "Hidden" Kernel 🐧
+Containers need a Linux kernel to understand their instructions. WSL 2 provides this by running a real Linux kernel inside a highly optimized, lightweight Virtual Machine (VM).
+Unlike a traditional VM that takes a long time to "boot up" and hogs resources, the WSL 2 VM:
+•	Starts in seconds: It feels almost like running a native Windows app.
+•	Shares resources: It only takes the RAM and CPU it needs, and can give it back to Windows when you're finished. 📉
+WSL 1 vs. WSL 2: The Big Shift
+Before WSL 2, there was WSL 1. It worked very differently:
+•	WSL 1: Acted as a "translator." It took Linux system calls and tried to translate them into Windows system calls. This was slow and many complex apps (like Docker!) simply didn't work because the translation wasn't perfect.
+•	WSL 2: Stopped translating and just gave the apps a real Linux engine (the kernel) to talk to. This achieved 100% system call compatibility, which is why you can now run Docker Desktop natively on Windows. ✅
