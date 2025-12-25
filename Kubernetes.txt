@@ -1,0 +1,87 @@
+Kubernetes is a set of independent controllers continuously reconciling desired state stored in etcd by watching the API Server — not a step-by-step execution engine.
+
+#Kubernetes: Container orchestration Management
+Main functionality of Kubernetes is to check the desired state and actual state of services(pod,container,storage,network,volumes)
+Kubernetes can be installed via dev(minikube..) prod(kubecdm,kops..)
+Kubernetes architecture: Cluster -1.control plane 2.dataplane
+cluster:manages all the nodes
+1.control plane: Api server, scheduler, etcd, control manager, cloud control manager.
+2. Worker node: kubelet, container runtime, kubeproxy
+
+#Flow:
+User communicates with Kubernetes thorugh cli and apiserver is the first entry and exit point of the cluster. API Server validates & authenticates
+ONLY state-changing api requests (create/update/delete) are stored in etcd. Read-only requests may never touch etcd
+Etcd: is used to store the cluster data.
+Container is a process isolation of a server- which runs on os-user-space from an image using host kernel. 
+Container runtime creates this env for container to run from an image.
+Pod is an software program used to group the multiple containers and provide them an common environment with a name space storage and network.
+
+Controllers DO NOT talk to each other.Controllers watch the API ServerAPI Server is the meeting room, not a messenger
+
+#LOW-LEVEL FLOW:
+Request: kubectl apply -f deployment.yaml
+🔹 Step 1: Client → API Server
+kubectl sends REST request
+API Server authenticates, authorizes, validates schema
+🔹 Step 2: API Server → etcd
+Deployment object is stored
+🔹 Step 3: Deployment Controller (watching API Server)
+Sees new Deployment
+Creates ReplicaSet object
+Writes ReplicaSet to API Server → etcd
+🔹 Step 4: ReplicaSet Controller
+Sees ReplicaSet
+Creates Pod objects
+Writes Pods to API Server → etcd
+🔹 Step 5: Scheduler
+Watches for Pending Pods
+Picks a node
+Writes nodeName into Pod spec
+Stores update via API Server → etcd
+🔹 Step 6: kubelet (on that node)
+kubelet watches API Server
+Sees Pod assigned to itself
+Pulls image via container runtime
+Creates Pod sandbox (pause container)
+Creates containers
+🔹 Step 7: kube-proxy
+Programs iptables / IPVS
+Enables Service → Pod networking
+
+#Pod restart policy depends on
+1.restartPolicy (Always / OnFailure / Never)
+Always: The container is restarted regardless of its exit status (success or failure). This is the default policy and is typically used for long-running applications like web servers.
+OnFailure: The container is restarted only if it exits with a non-zero exit code (indicating an error). This policy is ideal for batch jobs or tasks that should retry on failure until they succeed.
+Never: The container is not restarted, regardless of its exit status. This is useful for tasks that should run once and terminate, such as one-off scripts.
+2.Probe failures
+Startup Probe	Checks if the app has finished its slow boot-up process. If it fails-The kubelet kills and restarts the container.
+Liveness Probe	Checks if the app is "stuck" (deadlocked/frozen) during runtime. If it fails-The kubelet kills and restarts the container.
+Readiness Probe	Checks if the app is ready to handle user traffic.	If it fails-The Pod is removed from the Service (no traffic) but NOT restarted.
+
+#Default Probe time settings for startup,liveness,readiness
+initialDelaySeconds	: How long to wait after the container starts before doing the first check.	0
+periodSeconds	: How often to perform the check (the interval).	10s
+timeoutSeconds :	How long to wait for the app to respond before calling it a "fail."	1s
+failureThreshold	: How many times in a row it must fail before K8s takes action (restarting or removing from service).	3
+successThreshold :	How many times it must pass in a row to be "Healthy" again.	1
+
+#nodeheartbeat
+kubelet updates NodeStatus every 10s
+Node Controller checks health every ~40s
+Node marked NotReady after ~40s
+Pod eviction after 5 minutes (default)
+
+There are only three things in kubernetes, they are:
+API objects (data in etcd)
+Controllers (long-running loops)
+Pods / Containers (runtime)
+
+#Object:
+An object is an data which is not a source code or execution code or any script, its just plain data like A=B. 
+An api object is a format of this data into an api readable format like json file which forms a structure to the object(data) like 
+json
+{
+A=B
+}
+Now deployment.yaml file is converted into an json file by kubectl to send over http(api request) to the API Server 
+and api server turns it into typed internal objects and stores it as cluster state.
