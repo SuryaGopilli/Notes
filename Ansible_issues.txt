@@ -1,0 +1,22 @@
+Ansible
+why is the need for configuration tool evolved
+Chef vs ansible
+why ansible is used
+advantages of ansible
+how to install and use ansible
+what is inventory files
+what  is dynamic inventory files
+how to do config to block of servers at once using inventory files
+what are adhoc /cli commands in ansible
+how to connect to target server and do configs
+commands to execute touch txt in target server
+how  to write ansible playbook
+how to execute playbook
+what is verbose and how to check for it
+what are modules in ansible and how we can share it
+what are roles in ansible and how to use it
+
+1:30 -2:30 issues
+ansible couldn’t able to connect using private ip
+couldn’t ale to connect to another instance 
+need check for command ansible -I inventory all -m shell -a “touch.txt”
