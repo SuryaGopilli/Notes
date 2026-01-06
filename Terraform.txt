@@ -1,0 +1,36 @@
+Terraform :
+Iac is infra as code which is used for infra creation using specific propriotery tools for each service
+whereas terraform is an api as code which communicates with provides with api request and updates the actions
+Terraform has modules which are pre defined like for creating ec2 instances..
+using api calls it creates the infra
+❓ How can we merge two local state files?
+You can’t. Don’t try.
+Pick one. The other infra must be reconciled or destroyed.
+________________________________________
+❓ How can we store and reference state when cloning?
+Use a remote backend (S3, Terraform Cloud, etc.).
+Terraform automatically pulls the state on init.
+________________________________________
+❓ If we push state to Git and friend clones it, what happens?
+This is bad practice, but answering honestly:
+•	Friend clones repo → gets terraform.tfstate
+•	Runs terraform apply
+•	State file is updated, not recreated
+•	BUT:
+o	No locking
+o	Git conflicts
+o	High chance of corrupt state
+o	People overwrite each other
+This is how teams accidentally delete production.
+
+Terraform
+iac vs terraform
+what terraform does diff
+terraform life cycle init plan apply destroy
+what does terraform init does
+how to do authentication to service providers
+terraform file system main,provider,varibales,output,terraform
+local vs remote files
+what is the purpose of s3 and dynamodb
+what does statefile contains
+drawbacks of terraform
