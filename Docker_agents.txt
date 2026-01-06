@@ -1,0 +1,15 @@
+why use docker as agent instead of Jenkins
+how it provides the low cost
+how to integrate
+https://github.com/iam-veeramalla/Jenkins-Zero-To-Hero/blob/main/my-first-pipeline/Jenkinsfile
+CONTAINERS ARE VM’S: USED TO RUN THE SPECIFIC FUNCTIONALITY
+HERE RUNNING JENKINS BUILD IN CONTAINER INSTEAD OF RUNNING IN JENKINS SLAVE
+IT PERFORMS ALL ACTIONS MENTIONED IN JENKINS PIPELINE, CREATES MAGE AND PUSHES IT AND DLEETES THE CONTAINER. KUBERNETES WILL PICK THAT IMAGE AND RUN AN POD OUT OF IT.
+THIS WAY WE REDUCE THE UNSAGE COST OF JENKINS SERVER -COMPUTE IS COSTLY
+THIS IS OLD SCHOOL, WE NOW RUN THE JENKINS IN KUBERNETES.
+WHICH MY ORG FOLLOWS.
+[[Containers are lightweight, isolated execution environments (not VMs) used to run specific tasks.
+Jenkins can run builds inside containers instead of long-running Jenkins slaves.
+The container executes all pipeline steps; if the pipeline builds and pushes an image, that image is stored in a registry, and the build container is deleted.
+Kubernetes runs Pods only when a deployment is updated to use that image.
+To reduce idle compute cost, modern setups run Jenkins itself inside Kubernetes with ephemeral Pod agents, which is the industry standard today.]]
