@@ -1,0 +1,55 @@
+Docker – day 22 -9:05
+Introduction to containers?  What are vms and what are containers and why containers are used and what is the arch of containers. Containers concept vs builda. Drawbacks of containers.
+
+docker zero to hero 
+image file container
+DOCKER CLIENT -> DOCKER HOST [DAEMON,IMAGE,CONTAINER]->DOCKER REGISTRY
+*Docker Django -DAY25 RECHECK
+know about nodejs and Django 
+what is entry point and cmd
+
+Docker -21/12 -11:51 AM | Multi stage docker
+
+
+what is Multistage docker?
+Multi stage docker Is a concept used to create the container using only the runtime of the application as a base image to reduce the size of the image.
+classic docker file
+from ubuntu
+copy ..
+run /app
+whereas in docker multi stage we have two base images, two forms which takes the executable file or an runtime packed file and using an runtime env we run that application.
+
+What is docker bind mounts and docker volumes?
+docker bind mounts are mounting the container to a specific folder on host system to store the container logs and data
+bind mounts are managed by host.
+command : docker - –mount 
+docker volume is a concept of creating a logical isolation in host os where this isolation can be created, shared, destroyed in external or within host system.
+docker volumes cant be deleted when container is running, needs container to be stopped and volume can be deleted.
+volumes are managed by docker, persistent data.
+command : docker volume -v | docker – mount
+
+docker networking
+bridge network: docker host has an eth0 which has an ip of host, and veth is the bridge that auto assigns ip to docker container when its created, technically says both are in same subnet. Using this bridge containers talk to host and containers talk with each other.
+this approach allows technical breach of sensitive containers. so, we use custom bridge creation and isolate the communication between containers and only allows with host.
+host networking; docker host has an ip assigned by eth0. When we create the container using host as bridge then container will be under the host network. When docker host compromised to hacker the containers will also be exposed but the security with bridge will  be better and safer since it follows bridge networking concept-namespace and nat.
+•  Multi-stage Docker → remove build junk, keep runtime only
+•  Bind mount → host-controlled, risky, dev-only
+•  Volume → Docker-managed, safe, prod-ready
+•  Bridge network → isolated, default, safe
+•  Custom bridge → best practice
+•  Host network → fast, dangerous, niche use
+NOTE: what is eth0 and veth
+NOTE: what are the commands for docker bridge mount and volumes
+
+Docker compose: Composer is used to manage the lifecycle of containers, which was written in yaml language. It reduces the manual effort of building, running and grouping networks and volumes, based on dependencies of each container through an script.
+Docker volumes: 
+1. Bind mounts-binding the space allocation of host os to a container, which is managed by host caused the space is tightly coupled with host. Difficult to manage the data.
+2. Volumes-volumes creates an logical isolation in host managed by docker, docker as a software creates and manages which has administrative access on lifecycle of this location, can be mounted to other servers aswell.
+
+Docker networking: 
+Host network-By default host has an ip address which is called eth0 and any container will also have an default ip which is called eth0. Direct communication from host may compromise in security. 
+Docker Bridge-Docker creates an default ip which is called as default bridge/docker0 which manages the communication between the host and container by masking the ip’s of containers.
+Custom Bridge: To isolate the secure containers we use custom bridge to isolate the container from default bridge and create our bridge which communicates to host.
+overlays: To communicate across different hosts(servers) we install docker swarn in any of the host and attach the other hosts to that swarn network, now all the containers across different hosts can communicate through that overlay.
+Container Runtime: docker has an container runtime which is called docker shim
+Note: A runtime is nothing but an environment for execution of a binary.
