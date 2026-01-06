@@ -1,0 +1,89 @@
+Ansible
+---------
+
+What is the need for configuration management?
+Earlier we have the data centres and has ex over 10k instances which are different versions like ubuntu,centos,alphine,windows. Suppose u have to do upgrade the versions
+to latest and do security patches or install any dependency applications, sys admins used to write the script to perform the operations. 
+It required to write multiple scripts for each distro/version and each distro requires different scripting language, so there’s a need to build a configuration tool that can solve this problem.
+
+Tools:
+Chef -> Puppet ->Ansible->Salt
+Ansible is the widely and mostly used configuration management tool in industry.
+
+chef vs ansible
+
+chef:
+Uses pull method 
+Master, slave architecture: requires to do configs,cert  rotations
+chef requires its own language
+Ansible:
+Uses push methods
+*Agentless architecture : 
+Ansible will run via ssh connection in linux machines and winrm in windows machines.
+It allows passowrdless login, through ip/dns updated in inventory files will perform the configurations.
+Dynamic inventory-Ansible also supports dymanic inventory which auto manages the configuration of a server when it was not created using ansible by autodetection.
+Ansible supports both windows and linux machines, windows support increased after it was merged with redhat
+Ansible modules are written in pyhton language – to manage our services we can write modules in python language on our own and share it with community over Ansible galaxy.
+Ansible supports yaml language which doesn’t require user to learn a new one for managing services cause yaml is widely used in Kubernetes aswell.
+
+Ansbile drawbacks:
+Ansible has its setbacks/issues/improvements in these areas:
+1. Performance issues over large servers
+2. Less Windows support
+3. Debugging -ansible debug mode
+
+
+
+
+
+Ansible installation: sudo apt install ansible
+Usecase: two server 
+1. Ansible
+2. Ansible target
+Login to ansible using private and create ssh keys in .ssh folder
+Loginto ansible target using private and create authorised keys file  and add the ansible public key in authorised keys file and save it
+Now connected to ansible target server thorugh ssh @privateip of target server
+note: we use private ip cause we are in same vpc
+ansible inventory file: has details with regrads ip add of target servers default location of file is /etc/ansible/hosts
+We have cli commands for ansible for small actions like in shell (ls -al) we doesn’t have to write playbook for small actions like shell script for small actions
+These cli commands are called adhoc commands in ansible
+to talk with ansible target server
+ansible -I inventory “ipadd” -m “shell” “touch ansible.txt”
+-I for inventory and -m for module u can change modules 
+if inventory file is not in default path we use -I inventory if yes we don’t need to use this flag
+u can use all inplace of ipadd to execute command in all mentioned server in inventory file
+uor u can write ur inventory file like
+[db]
+ip
+ip 
+[service]
+ip
+ip and execute thecertain block like ansible -I inventory service -m “shell” “touch file”
+-----------------------------------------------------------------------------------------------------------
+create servers using terraform
+configure using private public key and add in authorised keys
+ssh @privateip
+using adhoc commands/cli commands talk to target server
+inventory file []
+playbook
+roles
+---
+- name: install nginx and start service
+ hosts: all
+become: root
+tasks:
+-name: install server
+apt:
+name:nginx
+state:present
+-name:sstrat service
+service:
+name:nginx
+state:started
+
+ansible -I inventory ip/all  -m “module” “command”
+ansible-playbook -I inventory ansibleplaybookfilepath
+ansible-playbokk -v -I inventory ansiblepath
+Roles
+ansible-galaxy role init Kubernetes
+pending: dynamic inventory
