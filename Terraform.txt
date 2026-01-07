@@ -34,3 +34,52 @@ local vs remote files
 what is the purpose of s3 and dynamodb
 what does statefile contains
 drawbacks of terraform
+
+
+07/01/2026 4:17 am
+terraform
+1.	terraform installation creates an binary executable file, nothing more will be created.
+2.	.tf  file is required to start initialising the terraform
+3.	Terraform sees all of it files as one
+4.	When terraform init is applied , plugins and resource version locking will be applied
+  1. Provider plugin: Terraform searches for provider blocks in tf files and downloads the provider plugins which helps in communication (api read calls) to respective         providers.
+  2. backendplugin: terraform initialises a state file structure creating an environment for state file to be created when apply is triggered, in backend s3 or any             storage locally or cloud and set up locking system for state file
+  3. Terraform downloads the provisioner plugins which helps in executing commands in resources-not used in production.
+  4. sets lock for provider plugin versions which it got installed. .terraform.lock.hcl
+  5. decides where the state file lives
+
+note: plugin download location is .terraform/ folder
+
+5.    terraform requires an authorisation and authentication to connect to cloud provider.
+6.   when a plan is applied, terraform and dag map(directed asyclic graph) which maps the dependencies of the resource creation: resources like network, vpc, server and many more resources are dependent on order of creation to solve and avoid conflict a dag is used. which can be done in 3 ways by terraform
+               1. Explicit dependency: we are implying the dependency in terraform file like create this after this. 2. Implicit dependency: terraform understands the dependency like servers depends on subnets A->B.  3.paralellism: any non-dependent tasks will be performed parallelly along with dependent ones to save time.
+Note: Dags are created dynamically whenever plan is applied, and deletion of resources done in a dag reverse order.
+7.  when plan is applied, terraform does 1. Checks desired state and read state file 2. Checks and resource state with state file. Based on dag, the resources creation starts and state file is locked using lock like dynamo db.
+
+note: statefile is created on apply and written upon apply completion.
+
+Note: when a manual modification to cloud is done, the terraform drifts and says I didn’t create this we can by  pass this and set state refresh again and run it.
+note: whenever a resource is created, the resource id along with metadata is stored in statefile. statefile consists of resource id and metadata.
+
+Terraform declarative -> tells to create something 
+state file->store what is desired based on backend plugin
+Dag -> map on which order to create based on implicit explicit dependencies
+Provider -> communicator on what to create based on provider plugin through api
+Cloud api -> reads and write to cloud 
+cloud-> creates the resource
+
+Init -> creates environment path for state file creation in backend, downloads plugins, set lock for versions of provider plugins
+plan -> checks and compare desired state to state file, also checks resurce state with state  file and intialises lock for the statefile, dag is created.
+apply->state file creation, resource changes and state file updated.
+Desired state check with state file with actual state of resource
+
+DAGS:
+06:17 am
+Dags: Directed acyclic graphs, Scheduled order works in dependent mode not in loops used in scheduling, taks.
+Dcgs: Directed cyclic graphs, works in loops used for iteration and feedbacks
+A computer science concept
+Cloud composer: Orchestration of workflows; manages dags. Provides good ui.
+Dags vs jobs vs cron jobs
+jobs:performs one task exeutin and returns the 0 as output
+cron jobs: performs one task execution at any defined time
+dags; performs multiple tasks executions with dependency order, can be scheduled. Can run multiple jobs as one for easier decoding. Written as scripts in python.
