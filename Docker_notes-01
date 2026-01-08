@@ -1,0 +1,238 @@
+Docker file 08/01/2026 thursday 2:18 pm
+https://chatgpt.com/share/695f6f62-eba4-8007-ac70-43f6655899a6
+
+FROM <imagename> AS firststage
+WORKDIR /app/  //setting workdirectory as /app at build time meaning while image is building it’ll set up an /app working directory in image layer
+COPY /dependeyfiles .
+RUN download <dependenctfile> . //runs the copied dependency file and stored in default location; we do this of running files before entire copy of files to avoid downloading of files when ever ther’s a change to any of the file
+COPY <all files> . //copies all files in current folder to /app
+RUN build -o <outputoffilelocationwithname> . //compiles all source code (usingextension files) into a binary and stores the output with mentioned filename
+=================
+FROM <lightimage> //using light image
+WORKDIR /light/  //setting working directory as /light/
+RUN adduser surya   // creates new user at container runtime, cause in runtime containers run using root, should avoid so we created surya as user
+RUN chown -R surya:surya /light/ //give permissions for user to not get any permissions issues
+USER surya //run as user surya at container runtime
+COPY - –from=firststage /app/<binaryfilename> . //copying the binary from earlier build into /light/ directory
+COPY /app/jsonfile . //copying the data file from earlier image
+ENV <envname>=<anyportthatucandefine> //setting env port for application to use it on runtime
+ENTRYPOINT [“./<binaryfilethatwecopied>”] //executes the binary file
+
+Understood.
+Below is ONE continuous story, simple English, correct order, nothing skipped, no hard words, no shortcuts.
+Read it slowly — this is the full picture.
+________________________________________
+The full Docker story (simple, complete, in order)
+I start on my computer where I already have all my application files, like source code, data files, and a Dockerfile. The Dockerfile is just a set of steps that tell Docker how to build something called an image. Nothing is running yet.
+When I run docker build, Docker reads the Dockerfile from top to bottom and follows each step one time. For every step, Docker makes a small saved change. These small saved changes are stacked together to form the image. The image is not a running application; it is just a stored copy of files and settings.
+While building the image, Docker copies files from my computer into the image only when I use COPY. Docker also runs commands written with RUN, and whatever files those commands create are saved inside the image. All these files become part of the image forever unless the image is rebuilt. Docker also remembers some settings like environment values and the command that should be used to start the application later.
+After the build is finished, the image contains the operating system files from the base image, the application files I copied, the files created during the build, and instructions about how the application should start. The Dockerfile itself is not used anymore.
+Now I share this image with my friend. When my friend runs docker pull, Docker downloads the image into its own internal storage on his machine. The image is downloaded in pieces, and Docker puts those pieces together and unpacks them into files. These files are not placed in his project folder; they are kept inside Docker’s storage. At this point, the image is only stored, not running.
+When my friend runs the image, Docker creates a container. A container is made by taking the image files and adding a small empty space on top where changes can happen. Docker then prepares the environment by setting the working directory, setting environment values, and choosing which user the program should run as.
+After that, Docker starts exactly one program. This program is defined by ENTRYPOINT or CMD in the Dockerfile. Docker does not read the Dockerfile again, and it does not rebuild or download anything. It only starts the program.
+The started program, which is usually a compiled binary, begins running like a normal Linux program. It reads environment values, reads data files that already exist inside the image, opens a network port, and keeps running. The program does not know it is inside Docker; it just sees files and folders.
+All the files that the program reads must already be inside the image. If a required file was not copied during the build, the program will fail when the container runs. Any file changes made while the container is running are temporary and are removed when the container stops.
+Inside Docker, image files are stored in layers. Each build step creates a layer that contains file changes. These layers are saved in a packed form when shared and are unpacked when downloaded. When the container runs, Docker joins all the layers together so the program sees one normal file system.
+By default, Docker runs the program as the root user, but this is unsafe and hides problems. Running the program as a normal user is safer and forces correct file access. If the program fails as a normal user, it means the program depends on root power, which should be fixed.
+In the end, Docker’s job is simple. It builds an image by collecting files and settings once, stores that image, and when asked to run it, starts one program using those stored files. Everything the program needs must already be inside the image before it starts.
+________________________________________
+One final line to remember
+Docker builds files first, stores them as an image, and later runs one program that uses those stored files.
+________________________________________
+This is the complete story, in correct order, with nothing skipped.
+
+
+Note: build can run as root but runtime should only be on user.
+ROM golang:1.22-alpine AS builder
+
+WORKDIR /usr/src/app/
+
+# Use Go build cache for dependencies
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    mkdir -p /root/.cache/go-build
+
+# Copy
+COPY go.mod go.sum ./
+
+# Download
+RUN go mod download
+
+# Copy the rest of the source code
+COPY . .
+
+RUN go build -o product-catalog .
+
+####################################
+
+FROM alpine AS release
+
+WORKDIR /usr/src/app/
+
+COPY ./products/ ./products/
+COPY --from=builder /usr/src/app/product-catalog/ ./
+
+ENV PRODUCT_CATALOG_PORT=8088
+ENTRYPOINT [ "./product-catalog" ]
+
+
+Below are clean, compact recall notes from everything we covered today.
+Save this. Re-read it before writing any Dockerfile.
+________________________________________
+Docker + Application Runtime — Master Notes
+1️⃣ Build time vs Runtime (non-negotiable)
+Build time
+•	Happens during docker build
+•	Instructions involved:
+o	FROM, WORKDIR, COPY, RUN
+•	Purpose:
+o	Compile code
+o	Prepare filesystem
+o	Create an image
+•	Happens once per image build
+Runtime
+•	Happens during docker run
+•	Instructions involved:
+o	ENTRYPOINT, CMD, ENV, USER
+•	Purpose:
+o	Start one Linux process
+•	Happens every time container starts
+Dockerfile is not executed at runtime
+________________________________________
+2️⃣ ENTRYPOINT vs CMD (exact meaning)
+•	ENTRYPOINT → what process the container IS
+•	CMD → default arguments to that process
+Low level:
+execve(ENTRYPOINT + CMD)
+Best practice for services:
+•	ENTRYPOINT = binary
+•	CMD = optional args
+________________________________________
+3️⃣ Binary ≠ Application
+Binary
+•	Compiled Go code
+•	Contains logic only
+•	Produced by go build
+Runtime data (NOT in binary)
+•	JSON / YAML configs
+•	Certs / keys
+•	Templates
+•	Migrations
+•	Any file opened at runtime
+If code uses os.Open / ReadFile → you must COPY it
+________________________________________
+4️⃣ Why COPY go.mod go.sum separately
+Purpose: Docker layer caching
+Pattern:
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+Why:
+•	Dependencies change less often than code
+•	Code change ≠ dependency re-download
+•	Faster builds
+Yes, COPY . . would work
+No, it’s not optimal
+________________________________________
+5️⃣ What COPY . . actually does
+•	Copies entire project from host
+•	Into image filesystem
+•	This is how source code enters container
+•	go.mod/go.sum are copied again (harmless overwrite)
+________________________________________
+6️⃣ What go build really does
+•	Compiles source code present in container filesystem
+•	Links dependencies from /go/pkg/mod
+•	Produces one binary
+•	Does NOT run the app
+•	Does NOT include external files
+________________________________________
+7️⃣ Multi-stage build (why it exists)
+Builder stage
+•	Has compilers & tools
+•	Produces binary
+Runtime stage
+•	Clean OS image
+•	Contains only:
+o	binary
+o	runtime data
+•	Smaller, safer, faster
+Build tools are never needed at runtime
+________________________________________
+8️⃣ Runtime data — what to look for in code
+Runtime data = anything touched after binary starts
+Look for:
+•	os.Open, ReadFile → files
+•	os.Getenv → env vars
+•	os.Create, writes → writable paths
+•	TLS / cert loading
+•	DB connections
+If you miss runtime data → container crashes in prod
+________________________________________
+9️⃣ Ports & ENV (common confusion)
+•	App binds to a port (developer decision)
+•	ENV provides config
+•	Docker/Kubernetes route traffic
+ENV does NOT:
+•	expose ports
+•	open firewall
+•	publish networking
+________________________________________
+🔟 ENTRYPOINT does NOT run Dockerfile
+ENTRYPOINT:
+•	Starts the binary
+•	Binary becomes PID 1
+•	Dockerfile steps are already done
+If binary exits → container stops
+________________________________________
+1️⃣1️⃣ Root vs non-root (critical)
+Default
+•	Containers run as root
+•	Root hides bugs
+•	Security risk
+Non-root
+•	Exposes bad assumptions
+•	Forces correct permissions
+•	Required in Kubernetes prod
+Rule:
+If app only works as root → app is broken
+________________________________________
+1️⃣2️⃣ Permission issues (truth)
+Yes, running as user can cause permission errors.
+That’s GOOD.
+It tells you:
+•	where app writes files
+•	what directories must exist
+•	what ownership is required
+Fix at build time:
+•	create directories
+•	chown them
+•	then switch user
+Never:
+•	chmod 777
+•	“just run as root”
+________________________________________
+1️⃣3️⃣ Dockerfile is DERIVED, not invented
+Before writing Dockerfile, you must know:
+1.	What command starts the app?
+2.	What files are read at runtime?
+3.	What env vars are required?
+4.	What port app binds to?
+5.	What user should run it?
+6.	What tools are build-only?
+If you can answer these → Dockerfile is easy.
+________________________________________
+Final mental lock 🔒
+•	Docker runs processes, not code
+•	Binary = logic, data = separate
+•	Build time ≠ runtime
+•	ENTRYPOINT defines purpose
+•	Non-root exposes reality
+•	Dockerfile mirrors application behavior
+________________________________________
+If you want, next we can:
+•	audit a real main.go together
+•	write a production-grade Dockerfile
+•	or map this directly to Kubernetes pods
+But for now — these notes are your foundation.
+
