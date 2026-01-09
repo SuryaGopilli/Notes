@@ -1,0 +1,55 @@
+09/01/2026 11:49 am friday
+
+Compiler: Converts source code in binary code-an executable file
+Interpreter: Converts source code into binary using an runtime
+Interpreter requires an runtime for conversion.
+
+Native Programming languages which are compilers:
+Language		Target Runtime Environment	Key Characteristic
+C / C++		Operating System (OS)	Requires only OS system libraries (libc, msvcrt).
+Rust		Operating System (OS)	Self-contained binaries; zero runtime overhead.
+Go (Golang)		Operating System (OS)	The runtime (GC/Scheduler) is packed inside the binary.
+Swift		Apple OS (iOS/macOS)	Optimized specifically for Apple hardware.
+Zig		Operating System (OS)	Compiles to small, dependency-free binaries.
+Fortran		Operating System (OS)	Used for legacy scientific/mathematical calculations.
+
+Bytecodes/virtual machines: Interpreters
+
+Language	Specific Runtime Required	Why it needs a Runtime
+Java	JRE / JVM (Java Runtime)	Handles memory (Garbage Collection) and platform independence.
+C#	.NET Runtime (CLR)	Provides the "Common Language Runtime" for Windows/Linux.
+Kotlin	JVM or ART (Android)	Runs on the Java VM or the Android-specific runtime.
+Scala2	JVM3	Uses the JVM for high-performance data processing.4
+Elixir / Erlang	BEAM (Erlang VM)	Designed for high-availability "hot-swapping" of code.
+
+Note: Transpiled (Build-Time Only)
+Some languages exist only for the developer. At runtime, they disappear and become a different language entirely.
+•	TypeScript: Requires a compiler to turn it into JavaScript. The user never "runs" TypeScript; they run the JavaScript it produced.
+•	Sass/Less: Compiles into CSS. The browser only sees CSS.
+•	Svelte: A "disappearing framework" that compiles code into highly optimized vanilla JavaScript at build-time.
+
+Scripting: interpreters
+Language	Specific Runtime Required	Notes
+Python	Python Interpreter	The python.exe or python3 engine must be installed.
+JavaScript	V8 / Node.js / Bun	Browsers have their own engines; servers use Node/Bun.
+PHP	PHP Engine (Zend)	Usually runs on a web server (Apache/Nginx) with PHP installed.
+Ruby	Ruby Interpreter (YARV)	Required to execute the .rb files.
+R	R Environment	Specific runtime for statistical computing and graphics.
+Perl	Perl Interpreter	Standard on most Linux systems; required for script execution.
+
+Dependency Files and list of package managers to install them
+1. Web & Managed Languages (Runtime Dependent)
+Language	Package Manager	Manifest File	Lock File	Download Command
+JavaScript/TS	npm / yarn	package.json	package-lock.json	npm install
+Python	pip / poetry	requirements.txt	poetry.lock	pip install -r requirements.txt
+Java	Maven / Gradle	pom.xml / build.gradle	gradle.lockfile	mvn install / gradle build
+C# (.NET)	NuGet	*.csproj	packages.lock.json	dotnet restore
+PHP	Composer	composer.json	composer.lock	composer install
+2. Compiled Systems Languages (Direct-to-Binary)
+Language	Package Manager	Manifest File	Lock File	Download Command
+Rust	Cargo	Cargo.toml	Cargo.lock	cargo build
+Go	Go Modules	go.mod	go.sum	go mod download
+Swift	SwiftPM	Package.swift	Package.resolved	swift package resolve
+C++	vcpkg / Conan	vcpkg.json	conan.lock	vcpkg install
+
+
